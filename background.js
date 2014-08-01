@@ -486,22 +486,25 @@ $(function() {
     }
   });
 
-  $('#post-to-leaderboard').livequery(function() {
-    if (window.username === null) {
+  $('#post-to-leaderboard').livequery(function() {    
+    if (window.username === null || window.username == undefined) {
+    console.log("window username: " + window.username);  
       $(this).click(function() {
         var total_milage = window.total_milage;
         console.log ('total milage!: ' + total_milage);
         enter_leaderboard_name_html = "Enter your name as you'd like it to appear on the Leaderboard: <br/><input id='username-input' type='text' style='width: 140px'/>";
-        enter_leaderboard_name_html += "<br/><a id='post-it' class='divvybrags-option'><i>Post to Leaderboard</i></a>";
+        enter_leaderboard_name_html += "<br/><a id='post-it-name-status' class='divvybrags-option'><i>Post to Leaderboard</i></a>";
         $('#username-area').html(enter_leaderboard_name_html);
         $('#post-to-leaderboard').html("");
       });
     } else {
       // checkName();
+      console.log("window usernamexxx: " + window.username);
       $(this).click(function() {
-        postIt();
+        postIt("new");
       });
     }
+    
   });
 
   $('#post-it').livequery(function() {
@@ -510,7 +513,21 @@ $(function() {
     });
   });
 
-  function checkName(){
+
+  function updateOrNewName(month_leaderboard_text){
+    var user_name = $('#username-input').val();
+    //Search leaderboard text for name
+    if (month_leaderboard_text.indexOf(user_name)!= -1){
+       var update_name_html ="<p>'"+ user_name+"' has already been posted to the leaderboard this month.</p>";
+       update_name_html +="<p>Would you like to <br/> choose a new name <br/><input id='username-input' type='text' value='"+user_name+"' style='width: 140px'/>" ;
+       update_name_html += "<br/>or do you want to update your mileage";
+       update_name_html += "with the name '" + user_name+"'?</p>";
+       update_name_html += "<br/><a id='post-it' class='divvybrags-option'><i>Post to Leaderboard</i></a>"
+      $('#username-area').html(update_name_html);
+    }
+  }
+
+  function checkLeaderboardForName(){
     var user_name = $('#username-input').val();
     var leaderboard_array = $('div#divvybrags p#leaderboard').children();
     var this_month_and_year = this_month + " " + this_year;
@@ -535,29 +552,39 @@ $(function() {
         }
       }
     }
-    //Search leaderboard text for name
-    console.log ('here is month text: ' + month_leaderboard_text);
-    if (month_leaderboard_text.indexOf('Malynda')!= -1){
-       enter_leaderboard_name_html += "This name has already been posted this month. Would you like to update mileage for this name, or choose a new name?"
-      console.log ('found the name!!');
-    } else { console.log ('this is a new name for this month!')}
+    return month_leaderboard_text;	
   }
 
-  function postIt() {
+  function nameStatus(){
+    var month_leaderboard_text = checkLeaderboardForName(); 
+    updateOrNewName(month_leaderboard_text);
+    console.log ('pause for effect?');
+    month_leaderboard_text = checkLeaderboardForName();
+    user_name = $('#username-input').val();
+    if (month_leaderboard_text.indexOf(user_name)!= -1){
+	var name_status =  "update";
+    }else{ 
+      name_status = "new";
+    } 
+      postIt(name_status);
+  }
+	
+  $('#post-it-name-status').livequery(function() {
+    $(this).click(function() {
+      nameStatus();
+    });
+  });
+	
+
+  function postIt(name_status) {
     var total_milage = window.total_milage;
     if (window.username === null) {
       var user_name = $('#username-input').val();
     } else {
       var user_name = window.username;
     }
-    // if (checkName()){
-    //   newName = false;
-     
-      
+	console.log ("name status: " + name_status);
 
-    // } else {
-    //   newName = true;
-    // }
 
     $.ajax({
       type: "POST",
