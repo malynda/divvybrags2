@@ -490,12 +490,14 @@ $(function() {
     if (window.username === null) {
       $(this).click(function() {
         var total_milage = window.total_milage;
+        console.log ('total milage!: ' + total_milage);
         enter_leaderboard_name_html = "Enter your name as you'd like it to appear on the Leaderboard: <br/><input id='username-input' type='text' style='width: 140px'/>";
         enter_leaderboard_name_html += "<br/><a id='post-it' class='divvybrags-option'><i>Post to Leaderboard</i></a>";
         $('#username-area').html(enter_leaderboard_name_html);
         $('#post-to-leaderboard').html("");
       });
     } else {
+      // checkName();
       $(this).click(function() {
         postIt();
       });
@@ -508,7 +510,8 @@ $(function() {
     });
   });
 
-  function checkName(user_name){
+  function checkName(){
+    var user_name = $('#username-input').val();
     var leaderboard_array = $('div#divvybrags p#leaderboard').children();
     var this_month_and_year = this_month + " " + this_year;
     var month_leaderboard_text = " " ;
@@ -535,6 +538,7 @@ $(function() {
     //Search leaderboard text for name
     console.log ('here is month text: ' + month_leaderboard_text);
     if (month_leaderboard_text.indexOf('Malynda')!= -1){
+       enter_leaderboard_name_html += "This name has already been posted this month. Would you like to update mileage for this name, or choose a new name?"
       console.log ('found the name!!');
     } else { console.log ('this is a new name for this month!')}
   }
@@ -546,33 +550,40 @@ $(function() {
     } else {
       var user_name = window.username;
     }
-    checkName(user_name);
+    // if (checkName()){
+    //   newName = false;
+     
+      
 
-    // $.ajax({
-    //   type: "POST",
-    //   url: "http://divvybrags-leaderboard.herokuapp.com/new_entry", 
-    //   data: { leaderboard_post: { name: user_name, miles: total_milage, city: "Chicago", month: window.this_month, year: window.this_year  } },
-    //   success: function(data) {
-    //     leaderboard_html = "";
-    //     var leaderboard = data["leaderboard"];
-    //     for (var i = 0; i <=leaderboard.length -1; i++){
-    //       var month = leaderboard[i];
-    //       var month_name = Object.keys(month);
-    //       leaderboard_html += "<h5 style ='font-style: italic;'>" + month_name + "</h5><br/>";
-    //       for (var k = 0; k<month[month_name].length; k++){
-    //         var leaderboard_entry = month[month_name][k];
-    //         var rank = Object.keys(leaderboard_entry);
-    //         var name = leaderboard_entry[rank]["name"];
-    //         var miles = leaderboard_entry[rank]["miles"];
-    //         leaderboard_html += "<h10>" + rank + ". " + name + ": " + miles + "mi</h10><br/>";
-    //       }
-    //       leaderboard_html += "<br/>"
-    //     }
-    //     $('#leaderboard').html(leaderboard_html);
-    //     $('#username-area').html("");
-    //     window.posted_to_leaderboard = true;
-    //   }
-    // });
+    // } else {
+    //   newName = true;
+    // }
+
+    $.ajax({
+      type: "POST",
+      url: "http://divvybrags-leaderboard.herokuapp.com/new_entry", 
+      data: { leaderboard_post: {update_status: name_status, name: user_name, miles: total_milage, city: "Chicago", month: window.this_month, year: window.this_year  } },
+      success: function(data) {
+        leaderboard_html = "";
+        var leaderboard = data["leaderboard"];
+        for (var i = 0; i <=leaderboard.length -1; i++){
+          var month = leaderboard[i];
+          var month_name = Object.keys(month);
+          leaderboard_html += "<h5 style ='font-style: italic;'>" + month_name + "</h5><br/>";
+          for (var k = 0; k<month[month_name].length; k++){
+            var leaderboard_entry = month[month_name][k];
+            var rank = Object.keys(leaderboard_entry);
+            var name = leaderboard_entry[rank]["name"];
+            var miles = leaderboard_entry[rank]["miles"];
+            leaderboard_html += "<h10>" + rank + ". " + name + ": " + miles + "mi</h10><br/>";
+          }
+          leaderboard_html += "<br/>"
+        }
+        $('#leaderboard').html(leaderboard_html);
+        $('#username-area').html("");
+        window.posted_to_leaderboard = true;
+      }
+    });
   }
       
 
